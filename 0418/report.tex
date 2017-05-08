@@ -1,0 +1,57 @@
+\documentclass[uplatex,a4paper]{jsarticle}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{minted}
+\definecolor{bg}{gray}{0.95}
+\title{パターン認識 4月18日の課題}
+\author{48176404 井原央翔}
+\begin{document}
+\maketitle
+\section{Numpyの挙動に関して}
+はじめに、私はanacondaではなく、Ubuntu 17.04のパッケージレポジトリからインストールしたPython 2.7.13とNumpy 1.12、matplotlib 2.0.0を使っているのですが、
+どうも挙動がanacondaと異なるようで、サンプルプログラムを動作させることができませんでした(散布図が表示されない)。
+原因を調べたところ、散布図を描画する\mintinline{c}{scatter}関数は1次元配列を受け取る仕様になっているのですが、
+\mintinline{python}{x[:,0]}のような引数を与えた場合、\mintinline{python}{x}が\mintinline{python}{np.matrix}の型を持っていると、N行1列の行列(2次元配列)が返ってしまいエラーとなるようです。
+ここを\mintinline{python}{x.T.A[0]}と変更すると正常に動作するようになりました。
+\section{課題1+2}
+Pythonソースコードを以下に示す。
+\inputminted[linenos=true,fontsize=\footnotesize,breaklines=true,bgcolor=bg]{python}{assignment2.py}
+\subsection{分布の生成とパラメータの推定}
+\mintinline{c}{scale}、\mintinline{c}{translate}、\mintinline{c}{rotate}なる関数を用いて、
+正規分布に従い生成された2組の2次元座標1000個($X_0,X_1$)に適当に決めた同次変換を適用し、その結果をプロットしたところ図\ref{fig:scatter0}のような散布図が得られた。
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=8cm]{figure_4.eps}
+\caption{同次変換を施した2組の正規分布}
+\label{fig:scatter0}
+\end{center}
+\end{figure}
+これらの平均$M_i$および共分散行列$\Sigma_i$を$X_0$および$X_1$についてそれぞれ計算し、これらを正規分布のパラメータとしたときの確率密度関数
+\[
+N_X\left(M,\Sigma\right) = \frac{1}{2\pi \left|\Sigma\right|^\frac{1}{2}} exp\left(-\frac{1}{2}\left(X_i-M_i\right)\Sigma^{-1}\left(X_i-M_i\right)^T\right)
+\]
+の等高線プロットを図\ref{fig:scatter0}に重ねた。
+\subsection{白色化}
+$\Sigma_0$の固有値と固有ベクトルを求め、それらを用いて$\Sigma_0$を白色化すると同時に、
+白色化に対応する変換を$X_0$と$X_1$にも施し、$X_{0W},X_{1W}$を得た。
+また、$\Sigma_0$を白色化したものと同じ変換を$\Sigma_1$にも施した。
+$X_{0W}$および$X_{1W}$の散布図、ならびにこの時点での$N_X$の等高線プロットを図\ref{fig:scatter1}に示す。
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=8cm]{figure_5.eps}
+\caption{片方の共分散行列に白色化を施した状態}
+\label{fig:scatter1}
+\end{center}
+\end{figure}
+\subsection{同時対角化}
+最後に、$\Sigma_1$の固有ベクトルを用いて$\Sigma_1$を対角化した。
+$\Sigma_1$を対角化する変換は直交変換であるから、これを$\Sigma_0$に適用しても$\Sigma_0$は白色化された状態を保った。
+対応する変換を適用して得られた$X_{0S}$および$X_{1S}$の散布図、ならびに最終的に得られた$N_X$の等高線プロットを図\ref{fig:scatter2}に示す。
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=8cm]{figure_6.eps}
+\caption{同時対角化が完了した状態}
+\label{fig:scatter2}
+\end{center}
+\end{figure}
+\end{document}
